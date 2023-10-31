@@ -1,14 +1,111 @@
-# Project
+# Reinforcement Learning with Moab
+## Train an Agent to Balance Objects on a Platform
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repo provides the code and instructions for training and deploying a reinforcement learning (RL) agent that can balance objects on a physical device using sensors and actuators. The device is Moab, a hardware kit that helps you learn about autonomous systems in a fun and interactive way.
 
-As the maintainer of this project, please make a few updates:
+The code includes a Python Gymnasium simulation environment for the Moab bot, as well as Python scripts for two popular RL frameworks: Stable Baselines3 and RLlib. The repo also provides Jupyter notebooks for assessing your trained agent in simulation, along with instructions for how to deploy it on the Moab hardware.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Getting Started
+
+To get started with this project, you need to have the following requirements:
+
+- Python 3.7 or higher (we recommend using [Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/stable/user-guide/install/download.html#anaconda-or-miniconda))
+- pip3 or conda
+- A Moab hardware kit (optional, but recommended)
+
+You can either download this repo or clone it with the following command in your terminal:
+
+```
+git clone https://github.com/microsoft/moab-rl.git
+```
+
+Then, install the dependencies using either pip3 or conda (we recommend using a virtual or conda environment):
+
+```
+conda env create -f environment.yml
+```
+
+or
+
+```
+pip3 install -r requirements.txt
+```
+
+
+## Project Structure
+
+The project is organized into four main components:
+
+- __Sim__: This folder contains the code for the simulation environment, which consists of a a physics-based simulation (`src/sim/model.py`) and a gymnasium.Env class that wraps the simulation for RL (`src/sim/sim_env.py`). This folder also contains a README file with more details about the simulation environment and how you can change it to improve generalization.
+
+- __Train__: Python scripts for two popular reinforcement learning frameworks, stable baselines and RLlib, are provided:
+
+    - `src/train_stablebaselines3.py`: Stable Baselines3 is a library for single-machine RL that supports several policy gradient and actor-critic methods. Its user-friendly design makes it easy to get started quickly.
+    - `src/train_rllib.py`: Ray RLlib is a library for single or distributed RL that supports a wider range of algorithms and customizations. [Microsoft’s Plato Toolkit](https://github.com/Azure/plato) provides several examples for distributed RL on Azure clusters.
+
+    These scripts contain the foundational code for you to build on for experimentation. Both scripts will save your trained agent as an ONNX file, which is a standard format for exchanging models across different platforms and frameworks. However, the RLlib ONNX policy will return logits instead of actions. An extra step is required to convert the logits to actions.
+
+- __Assess__: Once you have an ONNX policy saved, assessment can be done in both simulation and on the Moab hardware. We have provided two Jupyter notebooks for assessment with the simulation environment (`src/sb3_assess.ipynb` and `src/rllib_assess.ipynb`). The notebooks include code for loading your ONNX policy and running it on the simulation environment.
+
+- __Deploy__: Please see the next section for detailed instructions on how to deploy your ONNX policy on a physical Moab device.
+
+## Deploy Agent on Moab Hardware
+
+1. __Connect to Moab__
+
+    Follow the [connection instructions and SSH into your Moab](https://github.com/microsoft/moabian/blob/main/docs/connecting.md).
+
+2. __Update your Moab with the latest release__
+
+    In your Moab terminal, run the following commands:
+    ```
+    cd moab
+    git pull
+    sudo os/setup
+    sudo reboot 0
+    ```
+
+3.	__Install `onnxruntime`__
+
+    Your Moab is equipped with a Raspberry Pi 4 and the armv7l architecture. This architecture requires a specific wheel package for onnxruntime that is not available on PyPI and, therefore, cannot be installed directly with pip3.
+
+    Instead, please download the correct wheel for your platform from the [built-onnxruntime-for-raspberrypi-linux repository](https://github.com/nknytk/built-onnxruntime-for-raspberrypi-linux/tree/master). For example, if your Moab device has Debian version 10.4 and Python version 3.7, you might select: _/wheels/buster/onnxruntime-1.8.1-cp37-cp37m-linux_armv7l.whl_
+
+    You can add the wheel to your Moab device by copy-pasting it, or with secure copy:
+    ```
+    scp <filename>.whl pi@moab:~/moab
+    ```
+    Then install it with:
+    ```
+    pip3 install <filename>.whl
+    ```
+
+4.	__Add your ONNX policy file to Moab__
+
+    You can copy-paste or use secure copy to add your ONNX policy file to the Moab.
+
+5.	__Modify the software controller (`/moab/sw/controllers.py`)__
+
+6.	__Modify the Moab menu (`/moab/sw/menu.py`)__
+    Import the onnx_controller function that was created in Step 5.
+
+    In the build_menu function, add a MenuOption to the top_menu list:
+    ```python
+    MenuOption(
+        name="ONNX",
+        closure=onnx_controller,
+        kwargs={},
+        decorators=[log_csv] if log_on else None
+        )
+    ```
+
+7. __Select and test your policy__
+
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](^1^) file for details.
 
 ## Contributing
 
