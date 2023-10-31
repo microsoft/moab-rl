@@ -53,17 +53,12 @@ The project is organized into four main components:
 
 1. __Connect to Moab__
 
-    Follow the [connection instructions and SSH into your Moab](https://github.com/microsoft/moabian/blob/main/docs/connecting.md).
+    Follow the [connection instructions and SSH into your Moab](https://github.com/microsoft/moab-rl/blob/main/docs/connecting.md).
 
-2. __Update your Moab with the latest release__
+2. __(Optional) Calibrate Moab__
 
-    In your Moab terminal, run the following commands:
-    ```
-    cd moab
-    git pull
-    sudo os/setup
-    sudo reboot 0
-    ```
+    To get the best performance out of your Moab, you may need to calibrate it. Calibration adjusts Moab’s settings to match your ball color, position, and plate level. This improves Moab’s ability to detect and balance the ball accurately. This [calibration guide](https://github.com/microsoft/moab-rl/blob/main/docs/calibration.md) will take you through the steps to adjust your Moab’s settings for ball hue, ball position, and servo offset.
+
 
 3.	__Install `onnxruntime`__
 
