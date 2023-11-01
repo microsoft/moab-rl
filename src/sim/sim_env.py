@@ -56,10 +56,6 @@ def check_and_transform(observation_space, state):
 
 
 class MoabSim(Env):
-    """
-    Gymnasium wrapper for the MoabSim environment.
-    """
-
     def __init__(self, env_config):
         """Define the observation and action spaces."""
         self.observation_space = spaces.Box(
@@ -121,24 +117,30 @@ class MoabSim(Env):
             "ball_shell": np.random.uniform(
                 low=PingPongShell * 0.8, high=PingPongShell * 1.2
             ),
-            "ball_x": np.random.uniform(
+            "ball.x": np.random.uniform(
                 low=-self.model.plate_radius * 0.6, high=self.model.plate_radius * 0.6
             ),
-            "ball_y": np.random.uniform(
+            "ball.y": np.random.uniform(
                 low=-self.model.plate_radius * 0.6, high=self.model.plate_radius * 0.6
             ),
-            "ball_vel_x": np.random.uniform(
+            "ball_vel.x": np.random.uniform(
                 low=-self.model.plate_theta_vel_limit * 0.04,
                 high=self.model.plate_theta_vel_limit * 0.04,
             ),
-            "ball_vel_y": np.random.uniform(low=-0.2, high=0.2),
+            "ball_vel.y": np.random.uniform(low=-0.2, high=0.2),
             "roll": np.random.uniform(low=-0.2, high=0.2),
             "pitch": np.random.uniform(low=-0.2, high=0.2),
         }
 
         # update the model with the config parameters
-        for config_param in config:
-            eval("setattr(self.model, config_param, config[config_param])")
+        self.ball_radius = config["ball_radius"]
+        self.ball_shell = config["ball_shell"]
+        self.model.ball.x = config["ball.x"]
+        self.model.ball.y = config["ball.y"]
+        self.model.ball_vel.x = config["ball_vel.x"]
+        self.model.ball_vel.y = config["ball_vel.y"]
+        self.model.roll = config["roll"]
+        self.model.pitch = config["pitch"]
 
         # now we can update the initial plate metrics from the constants and the
         # controls

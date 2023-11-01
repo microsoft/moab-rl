@@ -1,5 +1,5 @@
 # Reinforcement Learning with Moab
-## Train an Agent to Balance Objects on a Platform
+## _Train an Agent to Balance Objects on a Platform_
 
 This repo provides the code and instructions for training and deploying a reinforcement learning (RL) agent that can balance objects on a physical device using sensors and actuators. The device is Moab, a hardware kit that helps you learn about autonomous systems in a fun and interactive way.
 
@@ -77,24 +77,116 @@ The project is organized into four main components:
 
 4.	__Add your ONNX policy file to Moab__
 
-    You can copy-paste or use secure copy to add your ONNX policy file to the Moab.
+    You can copy-paste or use secure copy to add your ONNX model file to the Moab.
 
 5.	__Modify the software controller (`/moab/sw/controllers.py`)__
 
-6.	__Modify the Moab menu (`/moab/sw/menu.py`)__
-    Import the onnx_controller function that was created in Step 5.
+    Add one or both of these functions based on how you generated your models.
 
-    In the build_menu function, add a MenuOption to the top_menu list:
+    **RLlib:**
     ```python
-    MenuOption(
-        name="ONNX",
-        closure=onnx_controller,
-        kwargs={},
-        decorators=[log_csv] if log_on else None
-        )
+    def rllib_onnx_controller(max_angle=22, **kwargs,):
+        import onnxruntime
+        session = onnxruntime.InferenceSession("/home/pi/moab/sw/rllib_model.onnx")
+
+        # Define a function for converting logits to actions for a SquashedGaussian distribution
+        def logits_to_actions(logits):
+            # Define low and high values
+            low = np.array([-1, -1], dtype=np.float32)
+            high = np.array([1, 1], dtype=np.float32)
+            # Define a constant for the minimum log value to avoid numerical issues
+            MIN_LOG_VALUE = -1e7
+            # Split the logits into mean and log_std
+            means, log_stds = logits[::2], logits[1::2]
+            actions = []
+            i = 0
+            for mean, log_std in zip(means, log_stds):
+                # Clip the log_std to a reasonable range
+                log_std = max(min(log_std, -MIN_LOG_VALUE), MIN_LOG_VALUE)
+                # Compute the std from the log_std
+                std = math.exp(log_std)
+                # Create a normal distribution with the mean and std
+                normal_dist = [mean, std]
+                # Sample a value from the normal distribution
+                normal_sample = mean # use the mean for deterministic output
+                # Apply a tanh function to the normal sample
+                tanh_sample = math.tanh(normal_sample)
+                # Scale the tanh sample by the low and high bounds of the action space
+                action = low[i] + (high[i] - low[i]) * (tanh_sample + 1) / 2
+                actions.append(action)
+                i += 1
+            # Return the list of actions
+            return actions
+
+        def next_action(state):
+            env_state, ball_detected, buttons = state
+            x, y, vel_x, vel_y, sum_x, sum_y = env_state
+
+            if ball_detected:
+                obs = np.array([x, y, vel_x , vel_y])
+                logits = session.run(None, {"obs": [obs], "state_ins": [None]})[0][0]
+                actions = logits_to_actions(logits)
+                pitch = actions[0]
+                roll = actions[1]
+                # Scale, clip and convert to integer
+                pitch = int(np.clip(pitch * max_angle, -max_angle, max_angle))
+                roll = int(np.clip(roll * max_angle, -max_angle, max_angle))
+                action = Vector2(-pitch, roll)
+            else:
+                # Move plate back to flat
+                action = Vector2(0, 0)
+            return action, {}
+
+        return next_action
     ```
 
-7. __Select and test your policy__
+    **Stable Baselines3:**
+    ```python
+    def sb3_onnx_controller(max_angle=22, **kwargs,):
+        import onnxruntime
+        session = onnxruntime.InferenceSession("/home/pi/moab/sw/sb3_model.onnx")
+        def next_action(state):
+            env_state, ball_detected, buttons = state
+            x, y, vel_x, vel_y, sum_x, sum_y = env_state
+
+            if ball_detected:
+                obs = np.array([x, y, vel_x , vel_y])
+                actions = session.run(None, {"input": [obs]})[0][0]
+                pitch = actions[0]
+                roll = actions[1]
+                # Scale, clip and convert to integer
+                pitch = int(np.clip(pitch * max_angle, -max_angle, max_angle))
+                roll = int(np.clip(roll * max_angle, -max_angle, max_angle))
+                action = Vector2(-pitch, roll)
+            else:
+                # Move plate back to flat
+                action = Vector2(0, 0)
+            return action, {}
+
+        return next_action
+    ```
+
+6.	__Modify the Moab menu (`/moab/sw/menu.py`)__
+
+    Import the function(s) created in Step 5.
+
+    In the build_menu function, add one or both of them to the *top_menu* list:
+    ```python
+    MenuOption(
+        name="RLlib",
+        closure=rllib_onnx_controller,
+        kwargs={},
+        decorators=[log_csv] if log_on else None
+    ),
+    MenuOption(
+        name="SB3",
+        closure=sb3_onnx_controller,
+        kwargs={},
+        decorators=[log_csv] if log_on else None
+    ),
+    ```
+
+8. __Select and test your policy__
 
 
 

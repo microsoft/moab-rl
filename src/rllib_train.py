@@ -31,7 +31,6 @@ def train(local=True):
         result = algo.train()
         print(pretty_print(result))
 
-    # outputs can be found in AML Studio under the "Outputs + Logs" tab of your job
     output_path = os.path.join(os.getcwd(), "outputs/")
     algo.get_policy().export_model(output_path, onnx=9)
     os.rename(output_path + "model.onnx", output_path + "rllib_model.onnx")
