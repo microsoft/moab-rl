@@ -87,6 +87,7 @@ The project is organized into four main components:
     ```python
     def rllib_onnx_controller(max_angle=22, **kwargs,):
         import onnxruntime
+        import math
         session = onnxruntime.InferenceSession("/home/pi/moab/sw/rllib_model.onnx")
 
         # Define a function for converting logits to actions for a SquashedGaussian distribution
@@ -97,7 +98,8 @@ The project is organized into four main components:
             # Define a constant for the minimum log value to avoid numerical issues
             MIN_LOG_VALUE = -1e7
             # Split the logits into mean and log_std
-            means, log_stds = logits[::2], logits[1::2]
+            split_index = len(logits) // 2
+            means, log_stds = logits[:split_index], logits[split_index:]
             actions = []
             i = 0
             for mean, log_std in zip(means, log_stds):

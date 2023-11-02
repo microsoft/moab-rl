@@ -26,8 +26,8 @@ def train(local=True):
         .environment(env="sim_env")
         .build()
     )
-    # Train for 100 iterations
-    for i in range(100):
+    # Train for 250 iterations
+    for i in range(250):
         result = algo.train()
         print(pretty_print(result))
 
