@@ -1,9 +1,9 @@
 # Reinforcement Learning with Moab
 ## _Train an Agent to Balance Objects on a Platform_
 
-This repo provides the code and instructions for training and deploying a reinforcement learning (RL) agent that can balance objects on a physical device using sensors and actuators. The device is Moab, a hardware kit that helps you learn about autonomous systems in a fun and interactive way.
-
-The code includes a Python Gymnasium simulation environment for the Moab bot, as well as Python scripts for two popular RL frameworks: Stable Baselines3 and RLlib. The repo also provides Jupyter notebooks for assessing your trained agent in simulation, along with instructions for how to deploy it on the Moab hardware.
+Welcome to Moab: a hardware kit that helps you learn about autonomous systems in a fun and interactive way. In this repository, we'll help you get started by providing the basic code to train and deploy your own reinforcement learning (RL) agent. Your agent will learn to balance objects on the Moab device using sensors and actuators.
+ 
+Our code features a Python Gymnasium simulation environment for the Moab bot, along with Python scripts compatible with two popular RL frameworks: Stable Baselines3 and RLlib. If you’re curious about how well your trained agent performs, we’ve got you covered! Our repository also contains Jupyter notebooks for assessing your agent in simulation, as well as step-by-step instructions on deploying it to the Moab hardware.
 
 ## Getting Started
 
@@ -57,7 +57,7 @@ The project is organized into four main components:
 
 2. __(Optional) Calibrate Moab__
 
-    To get the best performance out of your Moab, you may need to calibrate it. Calibration adjusts Moab’s settings to match your ball color, position, and plate level. This improves Moab’s ability to detect and balance the ball accurately. This [calibration guide](https://github.com/microsoft/moab-rl/blob/main/docs/calibration.md) will take you through the steps to adjust your Moab’s settings for ball hue, ball position, and servo offset.
+    To get the best performance out of your Moab, you may need to calibrate it. Calibration adjusts Moab’s settings to match your ball color, position, and plate level. This improves Moab’s ability to detect and balance the ball accurately. Our [calibration guide](https://github.com/microsoft/moab-rl/blob/main/docs/calibration.md) will take you through the steps to adjust your Moab’s settings for ball hue, ball position, and servo offset.
 
 
 3.	__Install `onnxruntime`__
@@ -90,7 +90,7 @@ The project is organized into four main components:
         import math
         session = onnxruntime.InferenceSession("/home/pi/moab/sw/rllib_model.onnx")
 
-        # Define a function for converting logits to actions for a SquashedGaussian distribution
+        # Define a function for converting logits to actions with a SquashedGaussian distribution for continuous action spaces.
         def logits_to_actions(logits):
             # Define low and high values
             low = np.array([-1, -1], dtype=np.float32)
@@ -172,7 +172,7 @@ The project is organized into four main components:
 
     Import the function(s) created in Step 5.
 
-    In the build_menu function, add one or both of them to the *top_menu* list:
+    In the build_menu function, add one or both of the menu options below to the *top_menu* list:
     ```python
     MenuOption(
         name="RLlib",
@@ -180,6 +180,9 @@ The project is organized into four main components:
         kwargs={},
         decorators=[log_csv] if log_on else None
     ),
+    ```
+
+    ```
     MenuOption(
         name="SB3",
         closure=sb3_onnx_controller,
@@ -187,6 +190,8 @@ The project is organized into four main components:
         decorators=[log_csv] if log_on else None
     ),
     ```
+
+7. __Quickly tap the power button to reset Moab__
 
 8. __Select and test your policy__
 
