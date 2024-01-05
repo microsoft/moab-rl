@@ -47,7 +47,22 @@ The project is organized into four main components:
 
 - __Assess__: Once you have an ONNX policy saved, assessment can be done in both simulation and on the Moab hardware. We have provided two Jupyter notebooks for assessment with the simulation environment (`src/sb3_assess.ipynb` and `src/rllib_assess.ipynb`). The notebooks include code for loading your ONNX policy and running it on the simulation environment.
 
-- __Deploy__: Please see the next section for detailed instructions on how to deploy your ONNX policy on a physical Moab device.
+- __Deploy__: Please see the section ["Deploy Agent on Moab Hardware"](#deploy-agent-on-moab-hardware) for detailed instructions on how to deploy your ONNX policy on a physical Moab device.
+
+## Train your Agent
+
+1. Choose your RL framework (Stable Baselines3 or RLlib) and open the corresponding Python script in the `src` folder.
+2. (Optional) Adjust the hyperparameters for the training process, such as the number training iterations and the algorithm to use.
+3. Run the script, then wait for training to finish. The script will save the trained ONNX policy file in the `src/outputs` folder.
+
+```
+python src/train_stablebaselines3.py
+```
+
+4. You can evaluate the policy using the simulation environment in the  Jupyter notebook provided, or deploy to the hardware itself (instructions are available in the next section).
+
+
+(Note) If you use RLlib, the saved ONNX policy will return logits instead of actions. You need to apply a softmax function to the logits to get the probabilities of each action, and then sample an action from the distribution. The function `logits_to_actions()` is available in `rllib_assess.ipynb`.
 
 ## Deploy Agent on Moab Hardware
 
@@ -62,7 +77,7 @@ The project is organized into four main components:
 
 3.	__Install `onnxruntime`__
 
-    Your Moab is equipped with a Raspberry Pi 4 and the armv7l architecture. This architecture requires a specific wheel package for onnxruntime that is not available on PyPI and, therefore, cannot be installed directly with pip3.
+    Your Moab is equipped with a Raspberry Pi 4 and the armv7l architecture. This architecture requires a specific wheel package for `onnxruntime` that is not available on PyPI and, therefore, cannot be installed directly with pip3.
 
     Instead, please download the correct wheel for your platform from the [built-onnxruntime-for-raspberrypi-linux repository](https://github.com/nknytk/built-onnxruntime-for-raspberrypi-linux/tree/master). For example, if your Moab device has Debian version 10.4 and Python version 3.7, you might select: _/wheels/buster/onnxruntime-1.8.1-cp37-cp37m-linux_armv7l.whl_
 
@@ -70,14 +85,18 @@ The project is organized into four main components:
     ```
     scp <filename>.whl pi@moab:~/moab
     ```
-    Then install it with:
+    Then install it in your Moab's terminal with:
     ```
     pip3 install <filename>.whl
     ```
 
 4.	__Add your ONNX policy file to Moab__
 
-    You can copy-paste or use secure copy to add your ONNX model file to the Moab.
+    You can copy-paste or use secure copy to add your ONNX model file to the Moab. For example:
+
+    ```
+    scp sb3_model.onnx pi@moab:~/moab
+    ```
 
 5.	__Modify the software controller (`/moab/sw/controllers.py`)__
 
