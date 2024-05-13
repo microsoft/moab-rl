@@ -1,7 +1,7 @@
 # Reinforcement Learning with Moab
 ## _Train an Agent to Balance Objects on a Platform_
 
-Welcome to Moab: a hardware kit that helps you learn about autonomous systems in a fun and interactive way. In this repository, we'll help you get started by providing the basic code to train and deploy your own reinforcement learning (RL) agent. Your agent will learn to balance objects on the Moab device using sensors and actuators.
+Welcome to Moab: a hardware kit that helps you learn about autonomous systems in a fun and interactive way! In this repository, we'll help you get started by providing the basic code to train and deploy your own reinforcement learning (RL) agent. Your agent will learn to balance objects on the Moab device using the Moab's sensors and actuators.
  
 Our code features a Python Gymnasium simulation environment for the Moab bot, along with Python scripts compatible with two popular RL frameworks: Stable Baselines3 and RLlib. If you’re curious about how well your trained agent performs, we’ve got you covered! Our repository also contains Jupyter notebooks for assessing your agent in simulation, as well as step-by-step instructions on deploying it to the Moab hardware.
 
@@ -40,7 +40,7 @@ The project is organized into four main components:
 
 - __Train__: Python scripts for two popular reinforcement learning frameworks, stable baselines and RLlib, are provided:
 
-    - `src/train_stablebaselines3.py`: Stable Baselines3 is a library for single-machine RL that supports several policy gradient and actor-critic methods. Its user-friendly design makes it easy to get started quickly.
+    - `src/sb3_train.py`: Stable Baselines3 is a library for single-machine RL that supports several policy gradient and actor-critic methods. Its user-friendly design makes it easy to get started quickly.
     - `src/train_rllib.py`: Ray RLlib is a library for single or distributed RL that supports a wider range of algorithms and customizations. [Microsoft’s Plato Toolkit](https://github.com/Azure/plato) provides several examples for distributed RL on Azure clusters.
 
     These scripts contain the foundational code for you to build on for experimentation. Both scripts will save your trained agent as an ONNX file, which is a standard format for exchanging models across different platforms and frameworks. However, the RLlib ONNX policy will return logits instead of actions. An extra step is required to convert the logits to actions.
@@ -56,13 +56,13 @@ The project is organized into four main components:
 3. Run the script, then wait for training to finish. The script will save the trained ONNX policy file in the `src/outputs` folder.
 
 ```
-python src/train_stablebaselines3.py
+python src/sb3_train.py
 ```
 
-4. You can evaluate the policy using the simulation environment in the  Jupyter notebook provided, or deploy to the hardware itself (instructions are available in the next section).
+4. You can evaluate the policy using the simulation environment in the  Jupyter notebook provided (`sb3_assess.ipynb` or `rllib_assess.ipynb`), or deploy to the hardware itself (instructions are available in the next section).
 
 
-(Note) If you use RLlib, the saved ONNX policy will return logits instead of actions. You need to apply a softmax function to the logits to get the probabilities of each action, and then sample an action from the distribution. The function `logits_to_actions()` is available in `rllib_assess.ipynb`.
+(Note) If train your agent using RLlib, the saved ONNX policy will return logits instead of actions. You need to apply a softmax function to the logits to get the probabilities of each action, and then sample an action from the distribution. The function `logits_to_actions()` is available in `rllib_assess.ipynb`.
 
 ## Deploy Agent on Moab Hardware
 
